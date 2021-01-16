@@ -1,0 +1,33 @@
+#version 330 core
+in vec2 TexCoords;
+
+out vec4 color;
+
+uniform sampler2D screenTexture;
+uniform vec2 brightness;
+
+void main(void)
+{   
+    float step_w = 1.0/1200;
+    float step_h = 1.0/600;
+    
+    vec4 sum = vec4(0.0);
+    vec2 offset[9]; float kernel[9];
+    offset[0] = vec2(-step_w, -step_h);   offset[1] = vec2(0.0, -step_h);   offset[2] = vec2(step_w, -step_h);
+    offset[3] = vec2(-step_w, 0.0);   offset[4] = vec2(0.0, 0.0);    offset[5] = vec2(step_w, 0.0);
+    offset[6] = vec2(-step_w, step_h);   offset[7] = vec2(0.0, step_h);   offset[8] = vec2(step_w, step_h);
+
+    kernel[0] = -1.0;    kernel[1] = -1.0;    kernel[2] = -1.0;
+    kernel[3] = -1.0;    kernel[4] = 17.0;    kernel[5] = -1.0;
+    kernel[6] = -1.0;     kernel[7] = -1.0;    kernel[8] = -1.0;
+
+    for(int i=0; i<9; i++ )  {
+        vec4 tmp = texture2D(screenTexture, TexCoords + offset[i]);
+        sum += tmp * kernel[i];
+    }
+    sum /= 9;
+    float gradient = 25.6;
+    sum.x = int(sum.x * gradient)/gradient; sum.y = int(sum.y * gradient)/gradient; sum.z = int(sum.z * gradient)/gradient;
+    color = vec4(vec3(sum), 1);
+    //color=texture2D(screenTexture, TexCoords);
+}
